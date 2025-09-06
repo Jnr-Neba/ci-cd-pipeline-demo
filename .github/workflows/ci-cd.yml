@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Build Docker image
+      - name: Build Docker image
+        run: docker build -t todo-api .
+
+      # 5️⃣ Run Docker container in detached mode
+      - name: Run Docker container
+        run: docker run -d -p 8080:8080 todo-api
+
+      # 6️⃣ Test API endpoints
+      - name: Test API
+        run: |
+          sleep 5 # wait for container to start
+          curl -X POST http://localhost:8080/tasks -H "Content-Type: application/json" -d '{"task":"CI/CD Test Task"}'
+          curl http://localhost:8080/tasks
+          curl http://localhost:8080/healthz
+
+      # 7️⃣ Stop all containers after tests
+      - name: Stop Docker containers
+        run: docker stop $(docker ps -q)
+
