@@ -23,36 +23,7 @@ services:
       POSTGRES_DB: mydb
     volumes:
       - db_data:/var/lib/postgresql/data
-    # 🚫 Removed ports mapping, app will connect internally via service name "db"
+    # 🚫 Removed "ports:" so CI/CD doesn’t fail with port conflicts
 
 volumes:
   db_data:
-
-
-services:
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: todo
-      POSTGRES_PASSWORD: todopass
-      POSTGRES_DB: todoapp
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  app:
-    build: .
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_USER: todo
-      DB_PASS: todopass
-      DB_NAME: todoapp
-    ports:
-      - "8080:8080"
-
-volumes:
-  db_data:
-
