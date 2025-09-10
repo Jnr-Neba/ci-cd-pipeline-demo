@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+iname: CI/CD Pipeline
 
 on:
   push:
@@ -9,11 +9,26 @@ on:
       - main
 
 jobs:
-  build-and-run:
+  build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: todo
+          POSTGRES_PASSWORD: todopass
+          POSTGRES_DB: todoapp
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U todo -d todoapp"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      # 1️⃣ Checkout the code
+      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -27,23 +42,26 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Build Docker image
+      # 4️⃣ Build Docker image for the app
       - name: Build Docker image
         run: docker build -t todo-api .
 
-      # 5️⃣ Run Docker container in detached mode
-      - name: Run Docker container
-        run: docker run -d -p 8080:8080 todo-api
+      # 5️⃣ Start Docker Compose (app + db)
+      - name: Start services with Docker Compose
+        run: docker-compose up -d
 
-      # 6️⃣ Test API endpoints
-      - name: Test API
+      # 6️⃣ Wait for services to be ready
+      - name: Wait for services
+        run: sleep 15
+
+      # 7️⃣ Run API tests
+      - name: Run API tests
         run: |
-          sleep 5 # wait for container to start
           curl -X POST http://localhost:8080/tasks -H "Content-Type: application/json" -d '{"task":"CI/CD Test Task"}'
           curl http://localhost:8080/tasks
           curl http://localhost:8080/healthz
 
-      # 7️⃣ Stop all containers after tests
-      - name: Stop Docker containers
-        run: docker stop $(docker ps -q)
+      # 8️⃣ Tear down containers
+      - name: Stop Docker Compose
+        run: docker-compose down
 
