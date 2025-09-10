@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+    app:
     build: .
     container_name: ci-cd-pipeline-demo-app
     depends_on:
@@ -12,7 +12,10 @@ services:
       - DB_USER=user
       - DB_PASSWORD=password
       - DB_NAME=mydb
+    ports:
+      - "8080:8080"   # 👈 expose app port so curl can reach it
     command: ["node", "app.js"]
+
 
   db:
     image: postgres:13
