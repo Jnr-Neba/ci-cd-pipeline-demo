@@ -48,7 +48,7 @@ jobs:
 
       # 5️⃣ Start Docker Compose (app + db)
       - name: Start services with Docker Compose
-        run: docker-compose up -d
+        run: docker compose up -d
 
       # 6️⃣ Wait for services to be ready
       - name: Wait for services
@@ -63,5 +63,5 @@ jobs:
 
       # 8️⃣ Tear down containers
       - name: Stop Docker Compose
-        run: docker-compose down
+        run: docker compose down
 
