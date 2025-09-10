@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-    app:
+  app:
     build: .
     container_name: ci-cd-pipeline-demo-app
     depends_on:
@@ -13,9 +13,8 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=mydb
     ports:
-      - "8080:8080"   # 👈 expose app port so curl can reach it
+      - "8080:8080"
     command: ["node", "app.js"]
-
 
   db:
     image: postgres:13
@@ -26,7 +25,7 @@ services:
       POSTGRES_DB: mydb
     volumes:
       - db_data:/var/lib/postgresql/data
-    # 🚫 Removed "ports:" so CI/CD doesn’t fail with port conflicts
+    # 🚫 no ports for CI, to avoid conflicts
 
 volumes:
   db_data:
