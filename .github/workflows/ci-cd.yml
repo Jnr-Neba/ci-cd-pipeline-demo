@@ -51,8 +51,25 @@ jobs:
         run: docker compose up -d
 
       # 6️⃣ Wait for services to be ready
-      - name: Wait for services
-        run: sleep 15
+      - name: Wait for app to be ready
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:8080/health > /dev/null; then
+              echo "App is up!"
+              exit 0
+            fi
+            echo "Waiting for app..."
+            sleep 3
+          done
+          echo "App did not start in time"
+          exit 1
+
+      - name: Test API
+        run: |
+          curl -X POST http://localhost:8080/tasks \
+          -H "Content-Type: application/json" \
+          -d '{"task":"CI/CD Test Task"}'
+
 
       # 7️⃣ Run API tests
       - name: Run API tests
